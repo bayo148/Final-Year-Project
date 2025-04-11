@@ -16,16 +16,24 @@
     <div class="chat-box">
         <h1>Shopping Assistant</h1>
 
+        <!-- Display existing messages from DB -->
+        <div id="chat-log">
+            {% for msg in user_messages %}
+                {% if msg.role == 'user' %}
+                    <div class="message user"><strong>You:</strong> {{ msg.message }}</div>
+                {% else %}
+                    <div class="message bot"><strong>Bot:</strong> {{ msg.message }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
         <form id="chat-form">
             {% csrf_token %}
             <input type="text" id="message" placeholder="Type your message..." required />
             <button type="submit">Send</button>
         </form>
-
-        <div id="chat-log">
-            <!-- Chat messages will appear here -->
-        </div>
     </div>
+
     <script>
         const form = document.getElementById('chat-form');
         const messageInput = document.getElementById('message');
@@ -36,10 +44,10 @@
             e.preventDefault();
             const message = messageInput.value;
 
-
+            // Display user's message in real time
             chatLog.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
 
-
+            // Send to backend
             fetch("/chat/", {
                 method: "POST",
                 headers: {
@@ -47,7 +55,7 @@
                     "X-CSRFToken": csrftoken,
                 },
                 body: new URLSearchParams({
-                message: message
+                    message: message
                 })
             })
             .then(response => response.json())
@@ -65,4 +73,5 @@
 
 </body>
 </html>
+
 
