@@ -1,0 +1,46 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h2>Your Profile</h2>
+
+{# 1. SUCCESS / ERROR BANNERS ------------------------------------------------ #}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+{# 2. PROFILE FORM ----------------------------------------------------------- #}
+<form method="post">
+  {% csrf_token %}
+  <p>
+    {{ form.phone_number.label_tag }}<br/>
+    {{ form.phone_number }}
+    {% if form.phone_number.errors %}
+      <span class="error">{{ form.phone_number.errors.0 }}</span>
+    {% endif %}
+  </p>
+
+  <p>
+    {{ form.address.label_tag }}<br/>
+    {{ form.address }}
+    {% if form.address.errors %}
+      <span class="error">{{ form.address.errors.0 }}</span>
+    {% endif %}
+  </p>
+
+  <button type="submit">Save</button>
+</form>
+
+{# 3. VERY LIGHT CSS (optional) --------------------------------------------- #}
+<style>
+  .alert      { padding: 8px 12px; margin-bottom: 12px; border-radius: 6px; }
+  .alert.success { background: #e0f6e9; color: #0c6836; }
+  .error      { color: #b30000; font-size: 0.9em; }
+  form p      { margin-bottom: 12px; }
+</style>
+{% endblock %}
+

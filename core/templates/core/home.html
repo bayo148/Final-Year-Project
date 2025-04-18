@@ -1,3 +1,17 @@
-<h1>Welcome to my app!</h1>
-<a href="/chat/">Start chatting</a>
+{% extends 'core/base.html' %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<h1>Welcome to the E-commerce Assistant!</h1>
+<p>This app helps you find products with natural-language chat.</p>
+
+{% if user.is_authenticated %}
+    <a href="{% url 'chat' %}">Start chatting</a>
+{% else %}
+    <p><a href="{% url 'login' %}">Log in</a> or <a href="{% url 'register' %}">register</a> to start chatting.</p>
+{% endif %}
+{% endblock content %}
+
+
 
