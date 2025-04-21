@@ -6,13 +6,6 @@
 {% block content %}
 <h2>Your Profile</h2>
 
-{# 1. SUCCESS / ERROR BANNERS ------------------------------------------------ #}
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {{ message.tags }}">{{ message }}</div>
-  {% endfor %}
-{% endif %}
-
 {# 2. PROFILE FORM ----------------------------------------------------------- #}
 <form method="post">
   {% csrf_token %}
@@ -35,12 +28,5 @@
   <button type="submit">Save</button>
 </form>
 
-{# 3. VERY LIGHT CSS (optional) --------------------------------------------- #}
-<style>
-  .alert      { padding: 8px 12px; margin-bottom: 12px; border-radius: 6px; }
-  .alert.success { background: #e0f6e9; color: #0c6836; }
-  .error      { color: #b30000; font-size: 0.9em; }
-  form p      { margin-bottom: 12px; }
-</style>
 {% endblock %}
 

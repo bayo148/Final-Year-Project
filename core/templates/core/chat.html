@@ -1,87 +1,30 @@
-{% extends 'core/base.html' %}
-
-{% block title %}Chat Assistant{% endblock title %}
+{% extends "core/base.html" %}
+{% block title %}Chat{% endblock %}
 
 {% block content %}
-<style>
-    .chat-box {
-        max-width: 600px;
-        margin: auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        overflow-y: auto;
-    }
+<h2 style="display:none">{{ conversation.title }}</h2> {# hidden for a11y #}
 
-    .message {
-        margin-bottom: 12px;
-    }
-
-    .user {
-        color: black;
-    }
-
-    .bot {
-        color: teal;
-        white-space: pre-wrap;
-    }
-
-    .message.user {
-        background-color: white;
-        padding: 10px;
-        border-radius: 8px;
-        margin: 10px 0;
-        display: inline-block;
-    }
-
-    .message.bot {
-        background-color: white;
-        padding: 10px;
-        border-radius: 8px;
-        margin: 10px 0;
-        display: inline-block;
-    }
-
-
-    input[type="text"] {
-        width: 80%;
-        padding: 8px;
-    }
-
-    button {
-        padding: 8px 16px;
-    }
-</style>
-
-<div class="chat-box">
-    <h1>Shopping Assistant</h1>
-
-    <!-- Display existing messages from DB -->
-    <div id="chat-log">
-      {% for msg in user_messages %}
-          <div class="message {{ msg.role }}">
-              {% if msg.role == 'user' %}
-                  <strong>You ({{ msg.timestamp|date:"H:i" }}):</strong> {{ msg.message }}
-              {% else %}
-                  <strong>Bot ({{ msg.timestamp|date:"H:i" }}):</strong> {{ msg.message }}
-              {% endif %}
-          </div>
-      {% endfor %}
-    </div>
-
-
-    <form id="chat-form">
-        {% csrf_token %}
-        <input type="text" id="message" placeholder="Type your message..." required />
-        <button type="submit">Send</button>
-    </form>
+<div id="chat-log" class="chat-log">
+    {% for msg in messages %}
+        <div class="message {{ msg.role }}">{{ msg.message }}</div>
+    {% empty %}
+        <p>No messages yet – say hi!</p>
+    {% endfor %}
 </div>
 
+<form id="chat-form" class="chat-input-bar">
+    {% csrf_token %}
+    <input type="text" id="message" placeholder="Send a message…" autocomplete="off" required>
+    <button type="submit">Send</button>
+</form>
+{% endblock %}
+
+{% block extra_js %}
 <script>
+    const chatLog = document.getElementById("chat-log");
+    chatLog.scrollTop = chatLog.scrollHeight;
     const form = document.getElementById('chat-form');
     const messageInput = document.getElementById('message');
-    const chatLog = document.getElementById('chat-log');
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     function formatResponse(text) {
@@ -96,7 +39,7 @@
         chatLog.scrollTop = chatLog.scrollHeight;
         messageInput.value = '';
 
-        fetch("/chat/", {
+        fetch(window.location.pathname, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -140,4 +83,4 @@
         });
     });
 </script>
-{% endblock content %}
+{% endblock %}
