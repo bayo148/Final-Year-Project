@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block title %}Your Persona{% endblock %}
+{% block content %}
+<h2>You are a <strong>{{ persona }}</strong></h2>
+<p>{{ description }}</p>
+<p>This will shape every product we recommend.</p>
+<p><a class="cta" href="{% url 'chat_new' %}">Start new chat</a></p>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}Persona Quiz{% endblock %}
+
+{% block content %}
+<h2>Let’s figure out your shopping style 🧭</h2>
+<p>This quick quiz helps us tailor product recommendations to your personality and preferences.</p>
+
+<form method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="form-question">
+      <label class="question-label"><strong>{{ field.label }}</strong></label>
+      {{ field }}
+      {% if field.errors %}
+        <p class="error">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit">See my persona</button>
+</form>
+{% endblock %}

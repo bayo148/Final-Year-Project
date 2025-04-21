@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm
 from.models import ChatMessage, UserProfile, Conversation
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -13,7 +12,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from.forms import ProfileUpdateForm
 from django.urls import reverse
-
+from .forms import (CustomUserCreationForm, ProfileUpdateForm, PersonaQuizForm)
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -49,14 +48,14 @@ def home(request):
 
 @login_required
 def new_chat(request):
-    """Create an empty conversation then redirect to it."""
-    convo = Conversation.objects.create(user=request.user)
+    convo = Conversation.objects.create(
+        user=request.user,
+        persona=request.user.userprofile.persona)
     return redirect("chat_with_id", conversation_id=convo.id)
 
 
 @login_required
 def chat_redirect_to_latest(request):
-    """/chat/ → newest conversation or a brand‑new one."""
     latest = request.user.conversations.first()
     if latest:
         return redirect("chat_with_id", conversation_id=latest.id)
@@ -71,15 +70,17 @@ def chat_view(request, conversation_id):
     if request.method == "POST":
         user_msg = request.POST.get("message", "")
 
-        # 1️⃣ save user message
         ChatMessage.objects.create(user=request.user, conversation=convo, message=user_msg, role="user")
 
-        # 2️⃣ call OpenAI + stream reply (unchanged except we attach convo)
         try:
+
+            profile = request.user.userprofile
+            persona_clause = f"\n\nThe user persona is '{profile.persona_label}'. Adapt suggestions accordingly."
+
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": SYSTEM_PROMPT + persona_clause},
                     {"role": "user", "content": user_msg},
                 ],
                 stream=True,
@@ -131,9 +132,8 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             messages.success(request, "Registration successful.")
-            # Automatically log the user in after registration
             login(request, user)
-            return redirect('chat')  # or wherever you want to redirect
+            return redirect('persona_quiz')
     else:
         form = CustomUserCreationForm()
     return render(request, 'core/register.html', {'form': form})
@@ -177,6 +177,58 @@ def profile_view(request):
 
     return render(request, "core/profile.html", {"form": form})
 
+from .forms import (CustomUserCreationForm, ProfileUpdateForm,
+                    PersonaQuizForm)
+
+@login_required
+def persona_quiz_view(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    if profile.persona:
+        return redirect("persona_result")
+
+    if request.method == "POST":
+        form = PersonaQuizForm(request.POST)
+        if form.is_valid():
+            profile.persona = form.determine_persona()
+            profile.save(update_fields=["persona"])
+            messages.success(request, "Persona saved")
+            return redirect("persona_result")
+    else:
+        form = PersonaQuizForm()
+
+    return render(request, "core/persona_quiz.html", {"form": form})
+
+
+@login_required
+def persona_result_view(request):
+    profile = request.user.userprofile
+    if not profile.persona:
+        return redirect("persona_quiz")
+
+    description = {
+        "budget":  "You love a great deal and value affordability.",
+        "luxury":  "Premium quality and prestige matter most to you.",
+        "eco":     "You prioritise sustainable and ethical products.",
+        "tech":    "Cutting‑edge specs and innovation excite you.",
+        "balanced": "You shop with a mix of practicality, value, and quality in mind. A versatile buyer.",
+    }[profile.persona]
+
+    return render(request, "core/persona_result.html", {
+        "persona": profile.persona_label,
+        "description": description,
+    })
+
+
+@login_required
+def reset_persona(request):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    profile = request.user.userprofile
+    profile.persona = ""
+    profile.save(update_fields=["persona"])
+    messages.info(request, "Persona cleared – let’s start over.")
+    return redirect("persona_quiz")
 
 
 

@@ -10,7 +10,6 @@
 </head>
 <body>
 <div class="app-wrap">
-    {# ---------- LEFT SIDEBAR (always visible) --------------- #}
     <aside class="sidebar">
         <a href="{% url 'home' %}"     class="{% if request.path == '/' %}active{% endif %}">Home</a>
         {% if user.is_authenticated %}
@@ -46,6 +45,15 @@
         <a href="/admin/">Admin</a>
     </aside>
     <main class="main-pane">
+        <header style="text-align:right;font-size:.9rem;">
+            {% if user.is_authenticated %}
+                {{ user.username }}
+                {% if user.userprofile.persona %}
+                    ({{ user.userprofile.persona_label }})
+                {% endif %}
+            {% endif %}
+        </header>
+
   {% block content %}{% endblock %}
     </main>
 </div>
