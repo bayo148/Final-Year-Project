@@ -157,13 +157,6 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    """
-    Display & update the logged‑in user’s profile.
-
-    • Existing data is pre‑filled because we pass `instance=profile`.
-    • `messages.success` is used so a banner appears after redirect.
-    • On validation errors, the same template is rendered with errors inline.
-    """
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
@@ -211,7 +204,7 @@ def persona_result_view(request):
         "luxury":  "Premium quality and prestige matter most to you.",
         "eco":     "You prioritise sustainable and ethical products.",
         "tech":    "Cutting‑edge specs and innovation excite you.",
-        "balanced": "You shop with a mix of practicality, value, and quality in mind. A versatile buyer.",
+        "balanced": "You shop with a mix of practicality, value, and quality in mind.",
     }[profile.persona]
 
     return render(request, "core/persona_result.html", {
