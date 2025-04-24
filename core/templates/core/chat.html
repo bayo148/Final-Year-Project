@@ -1,17 +1,20 @@
 {% extends "core/base.html" %}
+
 {% block title %}Chat{% endblock %}
 
 {% block content %}
-<h2 style="display:none">{{ conversation.title }}</h2> {# hidden for a11y #}
 
+<h2 style="display:none">{{ conversation.title }}</h2>
+
+{# this is the chat log #}
 <div id="chat-log" class="chat-log">
-    {% for msg in messages %}
+    {% for msg in chat_messages %}
         <div class="message {{ msg.role }}">{{ msg.message }}</div>
     {% empty %}
-        <p>No messages yet – say hi!</p>
+        <p>No messages yet – what do you need help with?</p>
     {% endfor %}
 </div>
-
+{# this is the chat input bar #}
 <form id="chat-form" class="chat-input-bar">
     {% csrf_token %}
     <input type="text" id="message" placeholder="Send a message…" autocomplete="off" required>
@@ -19,6 +22,7 @@
 </form>
 {% endblock %}
 
+{# this is the javascript #}
 {% block extra_js %}
 <script>
     const chatLog = document.getElementById("chat-log");
@@ -27,48 +31,57 @@
     const messageInput = document.getElementById('message');
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // cleans up double newlines to ensure proper formatting
     function formatResponse(text) {
         return text.split('\n\n').map(paragraph => `<p>${paragraph.trim()}</p>`).join('');
     }
-
+    // event listener for when the user submits a message
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         const message = messageInput.value;
 
+        // adds the user submitted message to the chat log
         chatLog.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
         chatLog.scrollTop = chatLog.scrollHeight;
         messageInput.value = '';
 
+        // sends the message to the backend for processing
         fetch(window.location.pathname, {
             method: "POST",
+            // standardised protection
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-CSRFToken": csrftoken
             },
             body: new URLSearchParams({ message: message })
         })
+
+        // processes the chatbot response
         .then(response => {
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
             let botMessage = '';
 
+            // creates bot message and its it to the log
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'message bot';
-            botMessageDiv.innerHTML = `<strong>Bot:</strong> `;
+            botMessageDiv.innerHTML = `<strong>Leaf:</strong> `;
             chatLog.appendChild(botMessageDiv);
             chatLog.scrollTop = chatLog.scrollHeight;
 
+            // allows for the bot response to be outputted token by token
             function read() {
                 reader.read().then(({ done, value }) => {
                     if (done) {
-                        botMessageDiv.innerHTML = `<strong>Bot:</strong> ${formatResponse(botMessage)}`;
+                        botMessageDiv.innerHTML = `<strong>Leaf:</strong> ${formatResponse(botMessage)}`;
                         setTimeout(() => {
                             chatLog.scrollTop = chatLog.scrollHeight;
                         }, 100);
                         return;
                     }
+                    // starts appending each token to the message and updates the display
                     botMessage += decoder.decode(value, { stream: true });
-                    botMessageDiv.innerHTML = `<strong>Bot:</strong> ${formatResponse(botMessage)}`;
+                    botMessageDiv.innerHTML = `<strong>Leaf:</strong> ${formatResponse(botMessage)}`;
                     chatLog.scrollTop = chatLog.scrollHeight;
                     read();
                 }).catch(error => {
@@ -78,6 +91,8 @@
             }
             read();
         })
+
+        // throws error if bot does not respond
         .catch(error => {
             chatLog.innerHTML += `<div class="message bot"><strong>Error:</strong> ${error}</div>`;
         });

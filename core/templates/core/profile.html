@@ -1,38 +1,45 @@
 {% extends "core/base.html" %}
-{% load static %}
-
 {% block title %}Profile{% endblock %}
-
 {% block content %}
 <h2>Your Profile</h2>
 
-<form method="post">
+{# displays profile info #}
+<div id="profile‑view">
+  <p><strong>First&nbsp;name:</strong> {{ user.first_name }}</p>
+  <p><strong>Last&nbsp;name:</strong> {{ user.last_name }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Phone:</strong> {{ user.userprofile.phone_number|default:'—' }}</p>
+  <p><strong>Persona:</strong> {{ user.userprofile.persona_label }}<br/>
+     <em>{{ user.userprofile.persona_description }}</em></p>
+
+  {# edit button #}
+  <button id="edit‑btn">Edit</button>
+</div>
+
+{# displays form to edit profile info #}
+<form id="profile‑form" method="post" style="display:none;max‑width:480px;">
   {% csrf_token %}
-  <p>
-    {{ form.phone_number.label_tag }}<br/>
-    {{ form.phone_number }}
-    {% if form.phone_number.errors %}
-      <span class="error">{{ form.phone_number.errors.0 }}</span>
-    {% endif %}
-  </p>
-
-  <p>
-    {{ form.address.label_tag }}<br/>
-    {{ form.address }}
-    {% if form.address.errors %}
-      <span class="error">{{ form.address.errors.0 }}</span>
-    {% endif %}
-  </p>
-
+  {{ form.as_p }}
   <button type="submit">Save</button>
+  <button type="button" id="cancel‑btn" style="margin‑left:8px;">Cancel</button>
 </form>
 
+{# reset persona button #}
 {% if user.userprofile.persona %}
-  <form action="{% url 'reset_persona' %}" method="post" style="margin-top:2rem;">
+  <form action="{% url 'reset_persona' %}" method="post" style="margin‑top:2rem;">
     {% csrf_token %}
     <button type="submit">Reset Persona</button>
   </form>
 {% endif %}
 
+<script>
+  // toggle between viewing profile and editing
+const view  = document.getElementById('profile‑view');
+const form  = document.getElementById('profile‑form');
+const edit  = document.getElementById('edit‑btn');
+const cancel= document.getElementById('cancel‑btn');
+edit.onclick   = ()=>{view.style.display='none';form.style.display='block';};
+cancel.onclick = ()=>{form.style.display='none';view.style.display='block';};
+</script>
 {% endblock %}
 

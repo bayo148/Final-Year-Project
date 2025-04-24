@@ -4,43 +4,40 @@ from django.contrib.auth.models import User
 import re
 from .models import UserProfile
 
-
-class ProfileUpdateForm(forms.ModelForm):
-    phone_number = forms.CharField(
-        max_length=20,
-        required=False,
-        widget=forms.TextInput(attrs={"placeholder": "e.g. +44 1234 567890"})
-    )
-    address = forms.CharField(
-        max_length=255,
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Your address"})
-    )
-
-    class Meta:
-        model = UserProfile
-        fields = ["phone_number", "address"]
-
-    def clean_phone_number(self):
-        value = self.cleaned_data["phone_number"]
-        if value and not re.fullmatch(r"\+?\d[\d\-\s]{7,}$", value):
-            raise forms.ValidationError("Enter a valid phone number.")
-        return value
-
-
+# adds more fields to Django default user creation
 class CustomUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
     email = forms.EmailField(required=True)
+    phone_number = forms.CharField(max_length=20, required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'password1', 'password2']
+
+    # adds phone number to UserProfile
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            UserProfile.objects.create(user=user, phone_number=self.cleaned_data.get('phone_number', ''))
+        return user
 
 
+
+# Used to update Profile after editing
 class ProfileUpdateForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+
     class Meta:
         model = UserProfile
-        fields = ['phone_number', 'address']
+        fields = ['phone_number']
 
+# questions for determining persona
 class PersonaQuizForm(forms.Form):
     Q1_CHOICES = [
         ("budget",  "Finding the lowest price is crucial"),
@@ -88,6 +85,7 @@ class PersonaQuizForm(forms.Form):
     q4 = forms.ChoiceField(label="Which sources do you trust most for shopping advice?", choices=Q4_CHOICES, widget=forms.RadioSelect)
     q5 = forms.ChoiceField(label="Which statement best describes your shopping philosophy?", choices=Q5_CHOICES, widget=forms.RadioSelect)
 
+    # logic for determining user persona
     def determine_persona(self):
         from collections import Counter
 
@@ -101,6 +99,7 @@ class PersonaQuizForm(forms.Form):
         count = Counter(votes)
         max_votes = max(count.values())
 
+        # resorts to balanced if votes are tied
         tied = [p for p, v in count.items() if v == max_votes]
 
         priority = ["tech", "eco", "luxury", "budget", "balanced"]

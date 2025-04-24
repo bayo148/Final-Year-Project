@@ -2,24 +2,19 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-<h1 style="font-size:2rem;margin-bottom:.5em;">Hey there 👋</h1>
+<h1 style="font-size:2rem;margin-bottom:.5em;">Hello There!</h1>
 <p style="font-size:1.1rem;max-width:38rem;line-height:1.6;">
-  Meet <strong>your personal shopping assistant</strong> — powered by GPT‑4o and
-  ready to hunt down the best products, deals and specs while you chat in plain English.
+  Meet <strong>your personal shopping assistant Leaf</strong> — powered by GPT‑4o and
+  ready to hunt down the best products, deals and specs for you.
 </p>
 
+{# displays different buttons depending on if user is logged in #}
 {% if user.is_authenticated %}
     <p><a class="cta" href="{% url 'chat' %}">Open Chat&nbsp;→</a></p>
 {% else %}
     <p><a class="cta" href="{% url 'login' %}">Log in</a> or
        <a class="cta" href="{% url 'register' %}">Create an account</a> to start chatting.</p>
 {% endif %}
-
-<style>
-  .cta{display:inline-block;margin-top:1.2em;padding:.7em 1.4em;border-radius:8px;
-       background:#10a37f;color:#fff;text-decoration:none;font-weight:600;}
-  .cta:hover{opacity:.9;}
-</style>
 {% endblock %}
 
 

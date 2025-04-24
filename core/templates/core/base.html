@@ -4,46 +4,44 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}E‑commerce Assistant{% endblock %}</title>
+    {# this is the main stylesheet #}
     <link rel="stylesheet" href="{% static 'core/theme.css' %}">
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 <div class="app-wrap">
+    {# shows sidebar only if user is logged in and has a persona #}
+    {% if user.is_authenticated and user.userprofile.persona %}
     <aside class="sidebar">
+        <img src="{% static 'core/logo-leaf.png' %}" class="logo" alt="Leaf logo">
+        {# navigation links #}
         <a href="{% url 'home' %}"     class="{% if request.path == '/' %}active{% endif %}">Home</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">Profile</a>
-            <a href="{% url 'logout' %}">Logout</a>
-            <a href="{% url 'chat' %}" class="{% if request.path|slice:'0:5' == '/chat' %}active{% endif %}">Chat</a>
+        <a href="{% url 'profile' %}"  class="{% if request.path == '/profile/' %}active{% endif %}">Profile</a>
+        <a href="{% url 'chat' %}"     class="{% if request.path|slice:'0:5' == '/chat' %}active{% endif %}">Chat</a>
+        <a href="{% url 'logout' %}">Logout</a>
 
-            {% if "chat" in request.path %}
-                <div class="submenu">
-                    <a href="{% url 'chat_new' %}">+ New chat</a>
-                    {% for c in sidebar_conversations %}
-                        <div class="submenu-item">
-                            <a  class="convo-link {% if conversation and conversation.id == c.id %}active{% endif %}"
-                                href="{% url 'chat_with_id' c.id %}">
-                                {{ c.title|default:c.created_at|date:"Ymd H:i" }}
-                            </a>
-
-                            {# single‑click delete — no JS menu needed #}
-                            <form method="post"
-                                    action="{% url 'delete_conversation' c.id %}"
-                                    onsubmit="return confirm('Delete this conversation?')">
-                                {% csrf_token %}
-                                <button class="delete-btn" title="Delete chat">×</button>
-                            </form>
-                        </div>
-                    {% endfor %}
+        {# displays submenu of chat history #}
+        {% if "chat" in request.path %}
+            <div class="submenu">
+            <a href="{% url 'chat_new' %}">New chat</a>
+            {% for c in sidebar_conversations %}
+                <div class="submenu-item">
+                <a  class="convo-link {% if conversation and conversation.id == c.id %}active{% endif %}"
+                    href="{% url 'chat_with_id' c.id %}">
+                    {{ c.title|default:c.created_at|date:" D M j H:i " }}
+                </a>
+                    {#delete button#}
+                <form method="post" action="{% url 'delete_conversation' c.id %}" onsubmit="return confirm('Delete this conversation?')">
+                    {% csrf_token %}<button class="delete-btn" title="Delete chat">×</button>
+                </form>
                 </div>
-            {% endif %}
-        {% else %}
-            <a href="{% url 'login' %}"   class="{% if request.path == '/accounts/login/' %}active{% endif %}">Login</a>
-            <a href="{% url 'register' %}"class="{% if request.path == '/accounts/register/' %}active{% endif %}">Register</a>
+            {% endfor %}
+            </div>
         {% endif %}
-        <a href="/admin/">Admin</a>
     </aside>
+    {% endif %}
+    {# this is the main content area for each page #}
     <main class="main-pane">
         <header style="text-align:right;font-size:.9rem;">
             {% if user.is_authenticated %}
@@ -58,7 +56,7 @@
     </main>
 </div>
 
-
+{# this is the toast notification area #}
 {% if messages %}
   <div id="toast-wrap">
     {% for m in messages %}
@@ -67,12 +65,13 @@
   </div>
 {% endif %}
 
+{# this is the javascript to fade out toasts notifications#}
 {% if messages %}
   <script>
     setTimeout(()=>{
       document.querySelectorAll('.toast').forEach(t=>{
         t.classList.add('fadeout');
-        setTimeout(()=> t.remove(), 400);   // wait for CSS transition
+        setTimeout(()=> t.remove(), 400);
       });
     }, 4000);
   </script>
