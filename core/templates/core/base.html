@@ -11,8 +11,8 @@
 </head>
 <body>
 <div class="app-wrap">
-    {# shows sidebar only if user is logged in and has a persona #}
-    {% if user.is_authenticated and user.userprofile.persona %}
+    {# shows sidebar only if user is logged in#}
+    {% if user.is_authenticated %}
     <aside class="sidebar">
         <img src="{% static 'core/logo-leaf.png' %}" class="logo" alt="Leaf logo">
         {# navigation links #}

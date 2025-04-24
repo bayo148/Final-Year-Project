@@ -30,7 +30,11 @@
     {% csrf_token %}
     <button type="submit">Reset Persona</button>
   </form>
+{% else %}
+  <p>You haven’t set a persona yet. <a href="{% url 'persona_quiz' %}">Take the quiz</a>.</p>
 {% endif %}
+
+
 
 <script>
   // toggle between viewing profile and editing
