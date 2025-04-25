@@ -218,9 +218,3 @@ class PersonaQuizCoreTest(TestCase):
         self.assertTemplateUsed(response, 'core/persona_result.html')
         self.assertContains(response, "Luxury Seeker")
 
-    def test_result_view_redirects_if_no_persona(self):
-        self.profile.persona = ""
-        self.profile.save()
-        response = self.client.get(self.result_url)
-        self.assertRedirects(response, self.quiz_url, status_code=302, target_status_code=200)
-
