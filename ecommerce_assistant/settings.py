@@ -16,8 +16,6 @@ import os
 
 load_dotenv()  # Loads .env variables into environment
 
-OPENAI_API_KEY = os.getenv('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')
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=6a5=-%kguc+pkq84d4c*+(oax*y3!dg0xh0@m!kq3rx=l5j6k'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 

@@ -84,9 +84,12 @@ source env/bin/activate  # On Windows: env\Scripts\activate
 pip install -r requirements.txt
 
 # 4. Set up environment variables
-touch .env
-# Add your OpenAI key
-echo "OPENAI_API_KEY=your-key-here" > .env
+# Create a .env file in the project root and add your OpenAI API key:
+# OPENAI_API_KEY=your-actual-key-here
+#
+# You must provide your own API key from https://platform.openai.com/api-keys
+# After editing .env, make sure you SAVE the file before starting the server,
+# otherwise the placeholder value will be used and the chat will not work.
 
 # 5. Run migrations
 python manage.py migrate

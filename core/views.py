@@ -56,14 +56,23 @@ def home(request):
 # starts new chat and redirects to the new chat page
 @login_required
 def new_chat(request):
-    convo = Conversation.objects.create(
-        user=request.user,
-        persona=request.user.userprofile.persona)
+    if not request.user.is_staff:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if not profile.persona:
+            return redirect("persona_quiz")
+        persona = profile.persona
+    else:
+        persona = ""
+    convo = Conversation.objects.create(user=request.user, persona=persona)
     return redirect("chat_with_id", conversation_id=convo.id)
 
 # attempts to redirect logged-in user to latest chat
 @login_required
 def chat_redirect_to_latest(request):
+    if not request.user.is_staff:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if not profile.persona:
+            return redirect("persona_quiz")
     latest = request.user.conversations.first()
     if latest:
         return chat_view(request, latest.id)
@@ -96,9 +105,9 @@ def chat_view(request, conversation_id):
 
             chat_history.append({"role": "user", "content": user_msg})  # append the new one
 
-            # calling gpt 4o with streaming enabled
+            # calling gpt-5.4 with streaming enabled
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5.4",
                 messages=chat_history,
                 stream=True,
             )
