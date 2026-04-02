@@ -1,7 +1,7 @@
 > Final Year Project | BSc Computer Science – University of Essex - Ecommerce based AI chatbot
 
 
-**Leaf** is a web-based e-commerce assistant that helps users find and compare products through a natural chat interface. It simulates an AI shopping advisor using GPT-4o, with responses tailored to each user’s unique shopping style.
+**Leaf** is a web-based e-commerce assistant that helps users find and compare products through a natural chat interface. It simulates an AI shopping advisor using GPT-5.4, with responses tailored to each user’s unique shopping style.
 
 ## How It Works
 
