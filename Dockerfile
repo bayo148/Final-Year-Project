@@ -8,6 +8,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 EXPOSE 8000
-RUN mkdir -p /app/staticfiles
-RUN python manage.py collectstatic --noinput
-CMD ["sh", "-c", "python manage.py migrate && gunicorn ecommerce_assistant.wsgi:application --bind 0.0.0.0:$PORT"]
+CMD ["sh", "-c", "mkdir -p /app/staticfiles && python manage.py collectstatic --noinput && python manage.py migrate && gunicorn ecommerce_assistant.wsgi:application --bind 0.0.0.0:$PORT"]
