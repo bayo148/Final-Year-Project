@@ -16,11 +16,7 @@ from .forms import (CustomUserCreationForm, ProfileUpdateForm, PersonaQuizForm)
 load_dotenv()
 
 # allows connection to the openai api via a key
-_api_key = os.getenv("OPENAI_API_KEY")
-if not _api_key:
-    import logging
-    logging.error("OPENAI_API_KEY is not set!")
-client = OpenAI(api_key=_api_key)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # the parameters for the chatbot
 SYSTEM_PROMPT = """
@@ -129,7 +125,7 @@ def chat_view(request, conversation_id):
             return StreamingHttpResponse(event_stream(), content_type="text/plain")
 
         except Exception as exc:
-            return JsonResponse({"error": str(exc)})
+            return JsonResponse({"error": f"{type(exc).__name__}: {exc.__cause__ or exc}"})
 
     # chat log
     chat_messages = convo.messages.order_by("timestamp")
