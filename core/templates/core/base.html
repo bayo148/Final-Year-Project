@@ -14,7 +14,7 @@
     {# shows sidebar only if user is logged in#}
     {% if user.is_authenticated %}
     <aside class="sidebar">
-        <img src="{% static 'core/logo-leaf.png' %}" class="logo" alt="Leaf logo">
+        <img src="{% static 'core/logo-leaf.png' %}" class="logo" alt="Leaf logo" style="height:120px;width:auto;">
         {# navigation links #}
         <a href="{% url 'home' %}"     class="{% if request.path == '/' %}active{% endif %}">Home</a>
         <a href="{% url 'profile' %}"  class="{% if request.path == '/profile/' %}active{% endif %}">Profile</a>
