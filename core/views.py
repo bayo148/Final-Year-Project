@@ -15,9 +15,6 @@ from .forms import (CustomUserCreationForm, ProfileUpdateForm, PersonaQuizForm)
 # loads environment variables
 load_dotenv()
 
-# allows connection to the openai api via a key
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 # the parameters for the chatbot
 SYSTEM_PROMPT = """
 You are Leaf, a friendly, witty, and eager-to-help e-commerce shopping assistant.
@@ -92,7 +89,9 @@ def chat_view(request, conversation_id):
     if request.method == "POST":
         user_msg = request.POST.get("message", "")
         ChatMessage.objects.create(user=request.user, conversation=convo, message=user_msg, role="user")
-
+        
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
         try:
             # providing context for GPT to understand
             profile = request.user.userprofile
