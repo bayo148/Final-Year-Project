@@ -77,7 +77,7 @@ git clone https://github.com/yourusername/leaf-chatbot.git
 cd leaf-chatbot
 
 # 2. Create a virtual environment
-python3 -m venv env
+python -m venv env
 source env/bin/activate  # On Windows: env\Scripts\activate
 
 # 3. Install dependencies
