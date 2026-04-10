@@ -150,3 +150,10 @@ LOGOUT_REDIRECT_URL = '/'
 
 SESSION_COOKIE_AGE = 1800
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://final-year-project-production-3807.up.railway.app', 
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
