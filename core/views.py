@@ -16,7 +16,7 @@ from .forms import (CustomUserCreationForm, ProfileUpdateForm, PersonaQuizForm)
 load_dotenv()
 
 # allows connection to the openai api via a key
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "").strip())
 
 # the parameters for the chatbot
 SYSTEM_PROMPT = """
