@@ -18,6 +18,9 @@ load_dotenv()
 # allows connection to the openai api via a key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "").strip())
 
+# maximum messages a logged-in user can send per session (resets on logout/login)
+MESSAGE_LIMIT_PER_SESSION = 20
+
 # the parameters for the chatbot
 SYSTEM_PROMPT = """
 You are Leaf, a friendly, witty, and eager-to-help e-commerce shopping assistant.
@@ -90,8 +93,16 @@ def chat_view(request, conversation_id):
 
     # logic for when a user sends a message
     if request.method == "POST":
+        # enforce per-session message limit (staff users are exempt)
+        sent_count = request.session.get("messages_sent", 0)
+        if not request.user.is_staff and sent_count >= MESSAGE_LIMIT_PER_SESSION:
+            return JsonResponse({
+                "error": f"You have reached the limit of {MESSAGE_LIMIT_PER_SESSION} messages for this session. Please log out and log back in to continue."
+            }, status=429)
+
         user_msg = request.POST.get("message", "")
         ChatMessage.objects.create(user=request.user, conversation=convo, message=user_msg, role="user")
+        request.session["messages_sent"] = sent_count + 1
 
         try:
             # providing context for GPT to understand
@@ -170,6 +181,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             request.session['just_logged_in'] = True
+            request.session['messages_sent'] = 0
             return redirect('chat')
     else:
         form = AuthenticationForm()
